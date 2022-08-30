@@ -7,7 +7,7 @@ const async = require('async');
 const tmp = require('tmp');
 const { execFile } = require('child_process');
 
-const convertWithOptions = (document, format, filter, options, callback) => {
+const convertWithOptions = (document, format, filter, isRunWithSudo, options, callback) => {
     const tmpOptions = (options || {}).tmpOptions || {};
     const asyncOptions = (options || {}).asyncOptions || {};
     const tempDir = tmp.dirSync({prefix: 'libreofficeConvert_', unsafeCleanup: true, ...tmpOptions});
@@ -45,7 +45,13 @@ const convertWithOptions = (document, format, filter, options, callback) => {
         },
         saveSource: callback => fs.writeFile(path.join(tempDir.name, 'source'), document, callback),
         convert: ['soffice', 'saveSource', (results, callback) => {
-            let command = `-env:UserInstallation=${url.pathToFileURL(installDir.name)} --headless --convert-to ${format}`;
+            let command = ''
+            let cmd = results.soffice;
+            if(isRunWithSudo){
+            	command += results.soffice+' ';
+            	cmd = 'sudo';
+            }
+            command += `-env:UserInstallation=${url.pathToFileURL(installDir.name)} --headless --convert-to ${format}`;
             if (filter !== undefined) {
                 command += `:"${filter}"`;
             }
@@ -71,8 +77,8 @@ const convertWithOptions = (document, format, filter, options, callback) => {
     });
 };
 
-const convert = (document, format, filter, callback) => {
-    return convertWithOptions(document, format, filter, {}, callback)
+const convert = (document, format, filter,isRunWithSudo, callback) => {
+    return convertWithOptions(document, format, filter, isRunWithSudo, {}, callback)
 };
 
 module.exports = {
