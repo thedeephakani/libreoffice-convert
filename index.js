@@ -57,7 +57,7 @@ const convertWithOptions = (document, format, filter, isRunWithSudo, options, ca
             }
             command += ` --outdir ${tempDir.name} ${path.join(tempDir.name, 'source')}`;
             const args = command.split(' ');
-            return execFile(results.soffice, args, callback);
+            return execFile(cmd, args, callback);
         }],
         loadDestination: ['convert', (results, callback) =>
             async.retry({
